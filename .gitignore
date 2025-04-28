@@ -19,5 +19,4 @@ yarn-error.log
 /.idea
 /.vscode
 /.zed
-/resources/views/profile*
-/resources/views/auth/forgot-password.blade.php
+
