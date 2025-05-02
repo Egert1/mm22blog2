@@ -37,7 +37,16 @@ class TagController extends Controller
      */
     public function show(Tag $tag)
     {
-        //
+        $posts = $tag->posts()
+            ->withCount('comments', 'likes')
+            ->with(['user', 'category', 'tags'])
+            ->latest()
+            ->simplePaginate(16);
+
+        return view('welcome', [
+            'posts' => $posts,
+            'tag'   => $tag,
+        ]);
     }
 
     /**

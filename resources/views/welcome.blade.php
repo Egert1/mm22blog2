@@ -1,60 +1,77 @@
 @extends('partials.layout')
 @section('content')
-    <div class="flex justify-center">
-        {{ $posts->links() }}
-    </div>
-    <div class="grid-cols-4 grid gap-4">
-        @foreach($posts as $post)
-            <div>
-                <div class="card bg-base-100 shadow-xl min-h-full">
-                    @if($post->image)
-                        <figure>
-                            <img src="{{ $post->image }}"
-                                alt="Shoes" />
-                        </figure>
-                    @endif
-                    <div class="card-body">
-                        <h2 class="card-title">{{ $post->title }}</h2>
-                        <p>{{ $post->snippet }}</p>
-                        <div class="flex flex-row">
-                            <div class="basis-1/2">
-                                <div class="tooltip w-fit" data-tip="{{ $post->created_at }}">
-                                    <p class="text-neutral-content">{{ $post->created_at->diffForHumans() }}</p>
-                                </div>
-                            </div>
-                            @if($post->created_at->notEqualTo($post->updated_at))
-                                <div class="basis-1/2 text-right">
-                                    <div class="tooltip w-fit" data-tip="{{ $post->updated_at }}">
-                                        <p class="text-neutral-content">Edited</p>
-                                    </div>
-                                </div>
-                            @endif
-                        </div>
+<div class="container mx-auto px-4 py-6">
+  <div class="flex justify-center mb-4">
+    {{ $posts->links() }}
+  </div>
 
-                        <p class="text-neutral-content"><a href="{{route('user', ['user' => $post->user])}}">{{ $post->user->name }}</a></p>
-                        <p class="text-neutral-content"><a href="{{route('category', ['category' => $post->category])}}">{{ $post->category->name }}</a></p>
+  @if(isset($tag))
+    <h1 class="text-3xl font-bold mb-6">
+      Posts tagged “{{ $tag->name }}”
+    </h1>
+  @endif
 
-                        <p class="text-neutral-content">Comments: {{ $post->comments_count }}</p>
-                        <p class="text-neutral-content">Likes: {{ $post->likes_count }}</p>
-                        <form action="{{ route('like', ['post' => $post]) }}" method="POST">
-                            @csrf
-                            @if($post->authHasLiked)
-                                <button class="btn btn-secondary">Unlike</button>
-                            @else
-                                <button class="btn btn-primary">Like</button>
-                            @endif
-                        </form>
-                        <div class="flex flex-wrap gap-1">
-                            @foreach ($post->tags as $tag)
-                                <div class="badge badge-primary badge-outline">{{$tag->name}}</div>
-                            @endforeach
-                        </div>
-                        <div class="card-actions justify-end">
-                            <a href="{{route('post', ['post'=>$post])}}" class="btn btn-primary">Read More</a>
-                        </div>
-                    </div>
-                </div>
+  @if($posts->isEmpty())
+    <p class="text-center text-gray-600">No posts found.</p>
+  @else
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      @foreach($posts as $post)
+        <div class="card bg-base-100 shadow-md overflow-hidden">
+          @if($post->image)
+            <figure>
+              <img src="{{ $post->image }}" alt="{{ $post->title }}" />
+            </figure>
+          @endif
+
+          <div class="card-body">
+            <h2 class="card-title">{{ $post->title }}</h2>
+            <p>{{ $post->snippet }}</p>
+
+            <div class="flex justify-between items-center text-sm text-gray-500 mb-2">
+              <span>{{ $post->created_at->diffForHumans() }}</span>
+              @if($post->updated_at->gt($post->created_at))
+                <span>Edited</span>
+              @endif
             </div>
-        @endforeach
+
+            <div class="text-xs text-neutral-content mb-2">
+              <a href="{{ route('user', $post->user) }}" class="link">{{ $post->user->name }}</a>
+              ·
+              <a href="{{ route('category', $post->category) }}" class="link">{{ $post->category->name }}</a>
+            </div>
+
+            <div class="flex items-center gap-2 mb-2">
+              <form action="{{ route('like', $post) }}" method="POST">
+                @csrf
+                <button type="submit"
+                        class="btn btn-sm {{ $post->authHasLiked ? 'btn-secondary' : 'btn-primary' }}">
+                  {{ $post->authHasLiked ? 'Unlike' : 'Like' }} ({{ $post->likes_count }})
+                </button>
+              </form>
+              <span class="text-sm">Comments: {{ $post->comments_count }}</span>
+            </div>
+            @if($post->tags->isNotEmpty())
+              <div class="flex flex-wrap gap-1 mb-4">
+                @foreach($post->tags as $tagItem)
+                  <a href="{{ route('tags.show', $tagItem) }}"
+                        class="btn btn-xs btn-outline btn-primary capitalize">
+                    {{ $tagItem->name }}
+                  </a>
+                @endforeach
+              </div>
+            @endif
+            <div class="card-actions justify-end">
+              <a href="{{ route('post', $post) }}" class="btn btn-sm btn-primary">
+                Read More
+              </a>
+            </div>
+          </div>
+        </div>
+      @endforeach
     </div>
+  @endif
+  <div class="flex justify-center mt-6">
+    {{ $posts->links() }}
+  </div>
+</div>
 @endsection

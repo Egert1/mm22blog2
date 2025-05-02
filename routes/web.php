@@ -1,20 +1,20 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TagController;
+
+Route::get('/tags/{tag}', [TagController::class, 'show'])
+     ->name('tags.show');
 
 Route::get('/', [PublicController::class, 'index'])->name('home');
 Route::get('/post/{post}', [PublicController::class, 'post'])->name('post');
-
 Route::get('/user/{user}', [PublicController::class, 'user'])->name('user');
 Route::get('/category/{category}', [PublicController::class, 'category'])->name('category');
 
-
-
-
-Route::middleware(['auth', 'verified'])->group(function (){
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/post/{post}/like', [PublicController::class, 'like'])->name('like');
     Route::post('/user/{user}/follow', [PublicController::class, 'follow'])->name('follow');
     Route::post('/post/{post}/comment', [PublicController::class, 'comment'])->name('comment');
@@ -28,7 +28,6 @@ Route::middleware(['auth', 'verified'])->group(function (){
     // Route::delete('/admin/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
     Route::resource('/admin/posts', PostController::class);
 });
-
 
 Route::get('/dashboard', function () {
     return view('dashboard');
